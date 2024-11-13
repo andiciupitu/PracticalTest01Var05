@@ -1,5 +1,6 @@
 package ro.pub.cs.systems.eim.practicaltest01var05
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -19,6 +20,7 @@ import ro.pub.cs.systems.eim.practicaltest01var05.ui.theme.PracticalTest01Var05T
 
 class MainActivity : ComponentActivity() {
     private var cardinalPointsCount = 0
+    private val REQUEST_CODE_SECONDARY = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,13 +51,36 @@ class MainActivity : ComponentActivity() {
         bottomLeftButton.setOnClickListener { buttonClickListener(bottomLeftButton) }
         bottomRightButton.setOnClickListener { buttonClickListener(bottomRightButton) }
         centerButton.setOnClickListener { buttonClickListener(centerButton) }
+        navigateButton.setOnClickListener {
+            // Resetare EditText și contor
+
+            val instructions = editText.text.toString()
+            editText.setText("")
+            cardinalPointsCount = 0
+            counterTextView.text = "Cardinal Points Selected: 0"
+
+            // Trimitere intenție pentru a deschide SecondaryActivity
+            val intent = Intent(this, PracticalTest01Var05SecondaryActivity::class.java)
+            intent.putExtra("INSTRUCTIONS", instructions)
+            startActivityForResult(intent, REQUEST_CODE_SECONDARY)
+        }
     }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         // Salvăm numărul total de apăsări în Bundle
         outState.putInt("cardinalPointsCount", cardinalPointsCount)
     }
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SECONDARY) {
+            val result = data?.getStringExtra("RESULT")
+            if (resultCode == RESULT_OK && result == "Verify") {
+                Toast.makeText(this, "Button pressed: Verify", Toast.LENGTH_SHORT).show()
+            } else if (resultCode == RESULT_CANCELED && result == "Cancel") {
+                Toast.makeText(this, "Button pressed: Cancel", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         // Restaurăm valoarea numărului de apăsări și actualizăm afișarea
